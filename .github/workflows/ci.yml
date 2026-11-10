@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            iris-engine
+            iris-app/src-tauri
+
+      - name: test engine
+        working-directory: iris-engine
+        run: cargo test
+
+      - name: build app
+        working-directory: iris-app/src-tauri
+        run: cargo build --release --features tauri/custom-protocol
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: amber-app
+          path: iris-app/src-tauri/target/release/amber-app.exe
