@@ -1,6 +1,6 @@
 [package]
 name = "amber-app"
-version = "0.1.0"
+version = "0.1.1"
 description = "Amber — Modern, ultra-lightweight eye protection and color temperature"
 authors = ["you"]
 edition = "2024"
