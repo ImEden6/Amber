@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amber — Eye Care</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: rgba(22, 27, 34, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent-warm: #ff9800;
+      --accent-glow: rgba(255, 152, 0, 0.35);
+      --accent-blue: #58a6ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable", "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 18px 20px;
+    }
+
+    /* Top bar */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ff9800, #ff5722);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .power-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .power-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .power-btn.active {
+      background: rgba(76, 175, 80, 0.15);
+      border-color: rgba(76, 175, 80, 0.4);
+      color: #81c784;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #8b949e;
+      transition: background 0.3s;
+    }
+
+    .power-btn.active .status-dot {
+      background: #4caf50;
+      box-shadow: 0 0 8px #4caf50;
+    }
+
+    /* Hero Glow Card */
+    .hero-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+    }
+
+    .glow-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffb74d 20%, #ff9800 80%);
+      box-shadow: 0 0 24px rgba(255, 152, 0, 0.5);
+      flex-shrink: 0;
+      transition: all 0.4s ease;
+    }
+
+    .hero-info {
+      flex: 1;
+    }
+
+    .hero-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .hero-temp {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .hero-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Slider Card */
+    .controls-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 16px;
+      backdrop-filter: blur(20px);
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .slider-val {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
+      cursor: pointer;
+    }
+
+    #tempSlider {
+      background: linear-gradient(90deg, #ff5722 0%, #ff9800 40%, #ffcc80 70%, #90caf9 100%);
+    }
+
+    #brightSlider {
+      background: linear-gradient(90deg, #212121 0%, #757575 50%, #ffffff 100%);
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .dim-badge {
+      display: inline-block;
+      font-size: 11px;
+      background: rgba(255, 152, 0, 0.12);
+      color: #ffb74d;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* Preset Pills */
+    .presets {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .preset-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 4px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .preset-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .preset-icon {
+      font-size: 16px;
+    }
+
+    /* Schedule Toggle Footer */
+    .schedule-bar {
+      margin-top: auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sched-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sched-title {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .sched-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Toggle Switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.15);
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #ff9800;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="brand-title">Amber</div>
+    </div>
+    <button class="power-btn active" id="powerBtn">
+      <span class="status-dot"></span>
+      <span id="powerText">Active</span>
+    </button>
+  </div>
+
+  <!-- Hero Glow Card -->
+  <div class="hero-card">
+    <div class="glow-preview" id="glowPreview"></div>
+    <div class="hero-info">
+      <div class="hero-label">Color Warmth</div>
+      <div class="hero-temp" id="tempDisplay">3400 K</div>
+      <div class="hero-sub" id="modeDescription">Sunset relaxation mode</div>
+    </div>
+  </div>
+
+  <!-- Sliders -->
+  <div class="controls-card">
+    <!-- Temperature Slider -->
+    <div class="slider-group">
+      <div class="slider-header">
+        <span>Color Temperature</span>
+        <span class="slider-val" id="tempVal">3400 K</span>
+      </div>
+      <input type="range" id="tempSlider" min="1000" max="6500" step="50" value="3400">
+    </div>
+
+    <!-- Brightness Slider -->
+    <div class="slider-group">
+      <div class="slider-header">
+        <span>Software Brightness <span class="dim-badge">Sub-hardware</span></span>
+        <span class="slider-val" id="brightVal">85%</span>
+      </div>
+      <input type="range" id="brightSlider" min="10" max="100" step="1" value="85">
+    </div>
+  </div>
+
+  <!-- Quick Presets -->
+  <div class="presets">
+    <button class="preset-btn" onclick="applyPreset('day')">
+      <span class="preset-icon">☀️</span>
+      <span>Day</span>
+    </button>
+    <button class="preset-btn" onclick="applyPreset('reading')">
+      <span class="preset-icon">📖</span>
+      <span>Read</span>
+    </button>
+    <button class="preset-btn" onclick="applyPreset('sunset')">
+      <span class="preset-icon">🌅</span>
+      <span>Sunset</span>
+    </button>
+    <button class="preset-btn" onclick="applyPreset('bedtime')">
+      <span class="preset-icon">🌙</span>
+      <span>Sleep</span>
+    </button>
+  </div>
+
+  <!-- Auto Schedule Toggle -->
+  <div class="schedule-bar">
+    <div class="sched-info">
+      <div class="sched-title">Automatic Schedule</div>
+      <div class="sched-desc">Seamlessly shifts from daylight to sunset to sleep</div>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="scheduleToggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <script>
+    const invoke = window.__TAURI__ ? window.__TAURI__.core.invoke : (cmd, args) => console.log('Mock IPC:', cmd, args);
+
+    const tempSlider = document.getElementById('tempSlider');
+    const brightSlider = document.getElementById('brightSlider');
+    const tempVal = document.getElementById('tempVal');
+    const brightVal = document.getElementById('brightVal');
+    const tempDisplay = document.getElementById('tempDisplay');
+    const glowPreview = document.getElementById('glowPreview');
+    const powerBtn = document.getElementById('powerBtn');
+    const powerText = document.getElementById('powerText');
+    const scheduleToggle = document.getElementById('scheduleToggle');
+    const modeDesc = document.getElementById('modeDescription');
+
+    function updateColorUI(kelvin, brightness) {
+      tempVal.textContent = `${kelvin} K`;
+      tempDisplay.textContent = `${kelvin} K`;
+      brightVal.textContent = `${brightness}%`;
+
+      // Visual color preview approximation
+      let color, glow;
+      if (kelvin >= 5500) {
+        color = '#90caf9';
+        glow = 'rgba(144, 202, 249, 0.45)';
+        modeDesc.textContent = 'Daylight focus mode';
+      } else if (kelvin >= 4000) {
+        color = '#ffe082';
+        glow = 'rgba(255, 224, 130, 0.45)';
+        modeDesc.textContent = 'Balanced reading mode';
+      } else if (kelvin >= 2800) {
+        color = '#ff9800';
+        glow = 'rgba(255, 152, 0, 0.5)';
+        modeDesc.textContent = 'Sunset relaxation mode';
+      } else {
+        color = '#ff5722';
+        glow = 'rgba(255, 87, 34, 0.6)';
+        modeDesc.textContent = 'Deep sleep / candlelight mode';
+      }
+
+      glowPreview.style.background = `radial-gradient(circle, #ffffff 10%, ${color} 80%)`;
+      glowPreview.style.boxShadow = `0 0 26px ${glow}`;
+    }
+
+    let isInteracting = false;
+
+    tempSlider.addEventListener('input', (e) => {
+      isInteracting = true;
+      const k = parseInt(e.target.value);
+      updateColorUI(k, brightSlider.value);
+      invoke('set_temperature', { kelvin: k, smooth: false });
+    });
+
+    tempSlider.addEventListener('change', () => {
+      isInteracting = false;
+      invoke('set_temperature', { kelvin: parseInt(tempSlider.value), smooth: true });
+    });
+
+    brightSlider.addEventListener('input', (e) => {
+      isInteracting = true;
+      const b = parseInt(e.target.value);
+      updateColorUI(tempSlider.value, b);
+      invoke('set_brightness', { brightness: b / 100.0, smooth: false });
+    });
+
+    brightSlider.addEventListener('change', () => {
+      isInteracting = false;
+      invoke('set_brightness', { brightness: parseInt(brightSlider.value) / 100.0, smooth: true });
+    });
+
+    powerBtn.addEventListener('click', async () => {
+      const active = await invoke('toggle_active');
+      setPowerUI(active);
+    });
+
+    function setPowerUI(active) {
+      if (active) {
+        powerBtn.classList.add('active');
+        powerText.textContent = 'Active';
+      } else {
+        powerBtn.classList.remove('active');
+        powerText.textContent = 'Paused';
+      }
+    }
+
+    scheduleToggle.addEventListener('change', (e) => {
+      invoke('set_schedule_mode', { enabled: e.target.checked });
+    });
+
+    async function applyPreset(name) {
+      const state = await invoke('apply_preset', { name });
+      if (state) {
+        tempSlider.value = state.kelvin;
+        brightSlider.value = Math.round(state.brightness * 100);
+        updateColorUI(state.kelvin, brightSlider.value);
+        setPowerUI(state.is_active);
+      }
+    }
+
+    // Initial sync
+    async function syncState() {
+      if (isInteracting) return;
+      try {
+        const state = await invoke('get_state');
+        if (state) {
+          tempSlider.value = state.kelvin;
+          brightSlider.value = Math.round(state.brightness * 100);
+          scheduleToggle.checked = state.schedule_enabled;
+          setPowerUI(state.is_active);
+          updateColorUI(state.kelvin, brightSlider.value);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    syncState();
+    setInterval(syncState, 5000);
+
+    if (window.__TAURI__ && window.__TAURI__.event) {
+      window.__TAURI__.event.listen('state-changed', (e) => {
+        const state = e.payload;
+        if (state && !isInteracting) {
+          tempSlider.value = state.kelvin;
+          brightSlider.value = Math.round(state.brightness * 100);
+          scheduleToggle.checked = state.schedule_enabled;
+          setPowerUI(state.is_active);
+          updateColorUI(state.kelvin, brightSlider.value);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

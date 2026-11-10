@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background Midnight Obsidian Gradient -->
+    <radialGradient id="bgGlow" cx="50%" cy="46%" r="65%">
+      <stop offset="0%" stop-color="#1F1710" />
+      <stop offset="50%" stop-color="#121318" />
+      <stop offset="100%" stop-color="#090A0D" />
+    </radialGradient>
+
+    <!-- Glass Rim Highlight -->
+    <linearGradient id="rimGrad" x1="10%" y1="0%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#FFA726" stop-opacity="0.45" />
+      <stop offset="40%" stop-color="#FF5722" stop-opacity="0.2" />
+      <stop offset="70%" stop-color="#FFFFFF" stop-opacity="0.04" />
+      <stop offset="100%" stop-color="#FF9800" stop-opacity="0.15" />
+    </linearGradient>
+
+    <!-- Ambient Aura -->
+    <radialGradient id="auraGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF7A00" stop-opacity="0.35" />
+      <stop offset="50%" stop-color="#FF5722" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Bold Eye Contour Gradient -->
+    <linearGradient id="eyeStrokeGrad" x1="0%" y1="30%" x2="100%" y2="70%">
+      <stop offset="0%" stop-color="#FFD54F" />
+      <stop offset="25%" stop-color="#FF9800" />
+      <stop offset="75%" stop-color="#FF5722" />
+      <stop offset="100%" stop-color="#E64A19" />
+    </linearGradient>
+
+    <!-- Iris Aperture Base Gradient -->
+    <radialGradient id="irisBase" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3E1A05" />
+      <stop offset="70%" stop-color="#1E0D03" />
+      <stop offset="100%" stop-color="#0D0704" />
+    </radialGradient>
+
+    <!-- Sun Core Gradients -->
+    <radialGradient id="sunAura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFF8E1" />
+      <stop offset="35%" stop-color="#FFB300" stop-opacity="0.9" />
+      <stop offset="70%" stop-color="#FF6D00" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#E65100" stop-opacity="0" />
+    </radialGradient>
+
+    <linearGradient id="sunBody" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#FFFDE7" />
+      <stop offset="40%" stop-color="#FFE082" />
+      <stop offset="70%" stop-color="#FF9800" />
+      <stop offset="100%" stop-color="#E65100" />
+    </linearGradient>
+    <linearGradient id="bladeGrad0" x1="0.0%" y1="50.0%" x2="100.0%" y2="50.0%">
+      <stop offset="0%" stop-color="#FFA726" />
+      <stop offset="45%" stop-color="#FF8F00" />
+      <stop offset="85%" stop-color="#E65100" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </linearGradient>
+    <linearGradient id="bladeGrad1" x1="18.8%" y1="10.9%" x2="81.2%" y2="89.1%">
+      <stop offset="0%" stop-color="#FFA726" />
+      <stop offset="45%" stop-color="#FF8F00" />
+      <stop offset="85%" stop-color="#E65100" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </linearGradient>
+    <linearGradient id="bladeGrad2" x1="61.1%" y1="1.3%" x2="38.9%" y2="98.7%">
+      <stop offset="0%" stop-color="#FFA726" />
+      <stop offset="45%" stop-color="#FF8F00" />
+      <stop offset="85%" stop-color="#E65100" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </linearGradient>
+    <linearGradient id="bladeGrad3" x1="95.0%" y1="28.3%" x2="5.0%" y2="71.7%">
+      <stop offset="0%" stop-color="#FFA726" />
+      <stop offset="45%" stop-color="#FF8F00" />
+      <stop offset="85%" stop-color="#E65100" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </linearGradient>
+    <linearGradient id="bladeGrad4" x1="95.0%" y1="71.7%" x2="5.0%" y2="28.3%">
+      <stop offset="0%" stop-color="#FFA726" />
+      <stop offset="45%" stop-color="#FF8F00" />
+      <stop offset="85%" stop-color="#E65100" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </linearGradient>
+    <linearGradient id="bladeGrad5" x1="61.1%" y1="98.7%" x2="38.9%" y2="1.3%">
+      <stop offset="0%" stop-color="#FFA726" />
+      <stop offset="45%" stop-color="#FF8F00" />
+      <stop offset="85%" stop-color="#E65100" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </linearGradient>
+    <linearGradient id="bladeGrad6" x1="18.8%" y1="89.1%" x2="81.2%" y2="10.9%">
+      <stop offset="0%" stop-color="#FFA726" />
+      <stop offset="45%" stop-color="#FF8F00" />
+      <stop offset="85%" stop-color="#E65100" />
+      <stop offset="100%" stop-color="#BF360C" />
+    </linearGradient>
+
+    <filter id="bloomFilter" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="tileShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.7" />
+    </filter>
+  </defs>
+
+  <!-- 1. Squircle Tile -->
+  <rect x="44" y="44" width="936" height="936" rx="216" ry="216"
+        fill="url(#bgGlow)" filter="url(#tileShadow)" />
+  <rect x="44" y="44" width="936" height="936" rx="216" ry="216"
+        fill="none" stroke="url(#rimGrad)" stroke-width="2.5" />
+
+  <!-- 2. Ambient Warm Light Burst -->
+  <circle cx="512" cy="512" r="380" fill="url(#auraGlow)" />
+
+  <!-- 3. Bold Guardian Eye Silhouette (Almond Aperture) -->
+  <g id="eye-frame">
+    <!-- Backing of the eye -->
+    <path d="M 140 512 C 240 270, 410 210, 512 210 C 614 210, 784 270, 884 512 C 784 754, 614 814, 512 814 C 410 814, 240 754, 140 512 Z"
+          fill="#110B07" fill-opacity="0.75" />
+
+    <!-- Outer Eye Glow Stroke -->
+    <path d="M 140 512 C 240 270, 410 210, 512 210 C 614 210, 784 270, 884 512 C 784 754, 614 814, 512 814 C 410 814, 240 754, 140 512 Z"
+          fill="none" stroke="url(#eyeStrokeGrad)" stroke-width="14" stroke-linejoin="round" stroke-linecap="round" filter="url(#bloomFilter)" />
+
+    <!-- Inner Eye Accent Line -->
+    <path d="M 195 512 C 285 320, 415 270, 512 270 C 609 270, 739 320, 829 512 C 739 704, 609 754, 512 754 C 415 754, 285 704, 195 512 Z"
+          fill="none" stroke="#FFB74D" stroke-width="2" stroke-opacity="0.3" />
+  </g>
+
+  <!-- 4. Circular Iris Bed -->
+  <circle cx="512" cy="512" r="262" fill="url(#irisBase)" stroke="#FF9800" stroke-width="4" stroke-opacity="0.6" />
+  <circle cx="512" cy="512" r="270" fill="none" stroke="#FFA726" stroke-width="1.5" stroke-dasharray="6 8" stroke-opacity="0.4" />
+
+  <!-- 5. True Overlapping Diaphragm Iris Blades -->
+  <g id="iris-diaphragm">
+    <!-- Blade 1 -->
+    <path d="M 762.0 512.0 Q 666.5 562.2 590.0 582.3 A 105 105 0 0 1 547.9 610.7 Q 605.2 703.0 612.0 741.1 A 250 250 0 0 0 762.0 512.0 Z" fill="url(#bladeGrad0)" stroke="#FFE082" stroke-width="2" stroke-opacity="0.5" />
+    <!-- Blade 2 -->
+    <path d="M 667.9 707.5 Q 569.1 664.1 505.7 616.8 A 105 105 0 0 1 457.2 601.6 Q 420.8 703.9 395.2 733.0 A 250 250 0 0 0 667.9 707.5 Z" fill="url(#bladeGrad1)" stroke="#FFE082" stroke-width="2" stroke-opacity="0.5" />
+    <!-- Blade 3 -->
+    <path d="M 456.4 755.7 Q 428.7 651.5 426.1 572.4 A 105 105 0 0 1 407.8 525.1 Q 305.1 560.3 266.4 558.5 A 250 250 0 0 0 456.4 755.7 Z" fill="url(#bladeGrad2)" stroke="#FFE082" stroke-width="2" stroke-opacity="0.5" />
+    <!-- Blade 4 -->
+    <path d="M 286.8 620.5 Q 351.0 533.8 411.2 482.6 A 105 105 0 0 1 436.8 438.7 Q 345.2 380.3 322.5 348.9 A 250 250 0 0 0 286.8 620.5 Z" fill="url(#bladeGrad3)" stroke="#FFE082" stroke-width="2" stroke-opacity="0.5" />
+    <!-- Blade 5 -->
+    <path d="M 286.8 403.5 Q 394.5 399.7 472.2 414.8 A 105 105 0 0 1 522.5 407.5 Q 510.9 299.5 521.3 262.2 A 250 250 0 0 0 286.8 403.5 Z" fill="url(#bladeGrad4)" stroke="#FFE082" stroke-width="2" stroke-opacity="0.5" />
+    <!-- Blade 6 -->
+    <path d="M 456.4 268.3 Q 526.6 350.2 563.1 420.3 A 105 105 0 0 1 600.2 455.0 Q 677.5 378.7 713.1 363.5 A 250 250 0 0 0 456.4 268.3 Z" fill="url(#bladeGrad5)" stroke="#FFE082" stroke-width="2" stroke-opacity="0.5" />
+    <!-- Blade 7 -->
+    <path d="M 667.9 316.5 Q 647.6 422.5 615.6 494.8 A 105 105 0 0 1 611.5 545.4 Q 719.4 558.3 753.5 576.7 A 250 250 0 0 0 667.9 316.5 Z" fill="url(#bladeGrad6)" stroke="#FFE082" stroke-width="2" stroke-opacity="0.5" />
+  </g>
+
+  <!-- 6. Aperture Rim Ring -->
+  <circle cx="512" cy="512" r="109" fill="none" stroke="#FFE082" stroke-width="3" stroke-opacity="0.8" />
+
+  <!-- 7. Glowing Sunset Sun (Core Pupil) -->
+  <g id="sunset-sun" filter="url(#bloomFilter)">
+    <!-- Radiant Halo -->
+    <circle cx="512" cy="512" r="141" fill="url(#sunAura)" />
+
+    <!-- Sun Disc -->
+    <circle cx="512" cy="512" r="105" fill="url(#sunBody)" />
+
+    <!-- Sunset Horizon Line Cuts (Circadian Day/Night Motif) -->
+    <line x1="427" y1="528" x2="597" y2="528" stroke="#FFE57F" stroke-width="3.5" stroke-linecap="round" />
+    <line x1="442" y1="546" x2="582" y2="546" stroke="#FFB74D" stroke-width="3" stroke-linecap="round" opacity="0.85" />
+    <line x1="464" y1="562" x2="560" y2="562" stroke="#FF7043" stroke-width="2.5" stroke-linecap="round" opacity="0.7" />
+
+    <!-- Solar Specular Highlight -->
+    <ellipse cx="488" cy="486" rx="24" ry="18" fill="#FFFFFF" opacity="0.75" transform="rotate(-15 488 486)" />
+    <circle cx="492" cy="490" r="8" fill="#FFFFFF" opacity="0.95" />
+  </g>
+
+  <!-- 8. Circadian Horizon Compass Stars -->
+  <circle cx="512" cy="210" r="7" fill="#FFE082" filter="url(#bloomFilter)" />
+  <circle cx="512" cy="814" r="5" fill="#FF5722" filter="url(#bloomFilter)" />
+  <circle cx="140" cy="512" r="5" fill="#FFD54F" filter="url(#bloomFilter)" />
+  <circle cx="884" cy="512" r="5" fill="#FF5722" filter="url(#bloomFilter)" />
+</svg>

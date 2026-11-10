@@ -1,0 +1,23 @@
+# Rust build artifacts
+target/
+**/target/
+**/*.rs.bk
+*.pdb
+*.d
+
+# Tauri artifacts
+**/src-tauri/gen/schemas
+
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Environment & logs
+*.log

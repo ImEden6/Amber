@@ -1,0 +1,10 @@
+[package]
+name = "iris-engine"
+version = "0.1.0"
+edition = "2024"
+
+[[bench]]
+name = "benchmarks"
+harness = false
+
+[dependencies]

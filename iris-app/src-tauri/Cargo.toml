@@ -1,0 +1,27 @@
+[package]
+name = "amber-app"
+version = "0.1.0"
+description = "Amber — Modern, ultra-lightweight eye protection and color temperature"
+authors = ["you"]
+edition = "2024"
+rust-version = "1.90"
+
+[lib]
+name = "app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7.4" }
+
+[dependencies]
+tauri = { version = "2.12.5", features = ["tray-icon"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+iris-engine = { path = "../../iris-engine" }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
