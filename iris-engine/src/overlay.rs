@@ -94,6 +94,35 @@ mod imp {
         fn TranslateMessage(lp_msg: *const MSG) -> BOOL;
         fn DispatchMessageW(lp_msg: *const MSG) -> LRESULT;
         fn GetSystemMetrics(n_index: i32) -> i32;
+        fn SetWindowPos(hwnd: HWND, after: HWND, x: i32, y: i32, cx: i32, cy: i32, flags: UINT) -> BOOL;
+    }
+
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn GetModuleHandleW(name: *const u16) -> HINSTANCE;
+        fn GetProcAddress(module: HINSTANCE, name: *const u8) -> *mut c_void;
+    }
+
+    const DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2: isize = -4;
+    const WM_ENDSESSION: u32 = 0x0016;
+    const WM_DISPLAYCHANGE: u32 = 0x007E;
+    const WM_DPICHANGED: u32 = 0x02E0;
+    const HWND_TOPMOST: isize = -1;
+    const SWP_NOACTIVATE: u32 = 0x0010;
+
+    fn use_per_monitor_dpi() {
+        let user32: Vec<u16> = "user32.dll\0".encode_utf16().collect();
+        unsafe {
+            let proc = GetProcAddress(GetModuleHandleW(user32.as_ptr()), c"SetThreadDpiAwarenessContext".as_ptr() as *const u8);
+            if !proc.is_null() {
+                let set_ctx: unsafe extern "system" fn(*mut c_void) -> *mut c_void = std::mem::transmute(proc);
+                set_ctx(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 as *mut c_void);
+            }
+        }
+    }
+
+    fn virtual_screen() -> (i32, i32, i32, i32) {
+        unsafe { (GetSystemMetrics(76), GetSystemMetrics(77), GetSystemMetrics(78), GetSystemMetrics(79)) }
     }
 
     #[link(name = "gdi32")]
@@ -113,6 +142,19 @@ mod imp {
                         SetLayeredWindowAttributes(hwnd, 0, alpha, LWA_ALPHA);
                         ShowWindow(hwnd, SW_SHOW);
                     }
+                }
+                0
+            }
+            WM_DISPLAYCHANGE | WM_DPICHANGED => {
+                let (x, y, w, h) = virtual_screen();
+                unsafe {
+                    SetWindowPos(hwnd, HWND_TOPMOST as HWND, x, y, w, h, SWP_NOACTIVATE);
+                }
+                0
+            }
+            WM_ENDSESSION => {
+                if w_param != 0 {
+                    crate::engine::restore_on_shutdown();
                 }
                 0
             }
@@ -142,6 +184,8 @@ mod imp {
             let is_running_clone = Arc::clone(&is_running);
 
             let handle = thread::spawn(move || {
+                use_per_monitor_dpi();
+
                 let class_name: Vec<u16> = "AmberDimmerOverlay\0".encode_utf16().collect();
                 let black_brush = unsafe { CreateSolidBrush(0x00000000) };
 
@@ -164,10 +208,7 @@ mod imp {
                     RegisterClassExW(&wc);
                 }
 
-                let x = unsafe { GetSystemMetrics(76) };
-                let y = unsafe { GetSystemMetrics(77) };
-                let w = unsafe { GetSystemMetrics(78) };
-                let h = unsafe { GetSystemMetrics(79) };
+                let (x, y, w, h) = virtual_screen();
 
                 let ex_style = WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
                 let hwnd = unsafe {
