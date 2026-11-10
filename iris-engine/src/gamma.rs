@@ -63,12 +63,6 @@ impl GammaRamp {
         out
     }
 
-    pub fn is_tinted(&self) -> bool {
-        let tops = [self.red[255], self.green[255], self.blue[255]];
-        let max = *tops.iter().max().unwrap() as u32;
-        max == 0 || tops.iter().any(|&t| (t as u32) * 10 < max * 9)
-    }
-
     pub fn lerp(&self, target: &GammaRamp, factor: f64) -> Self {
         let factor = factor.clamp(0.0, 1.0);
         let t = (1.0 - (factor * std::f64::consts::PI).cos()) / 2.0;
@@ -119,14 +113,6 @@ mod tests {
         assert_eq!(scaled.red[255], 65535);
         assert_eq!(scaled.green[255], 32768);
         assert_eq!(scaled.blue[255], 0);
-    }
-
-    #[test]
-    fn test_tinted_detection() {
-        assert!(!GammaRamp::linear().is_tinted());
-        assert!(!GammaRamp::from_multipliers(1.0, 0.97, 0.95, None).is_tinted());
-        assert!(GammaRamp::from_multipliers(1.0, 0.75, 0.54, None).is_tinted());
-        assert!(GammaRamp::from_multipliers(0.0, 0.0, 0.0, None).is_tinted());
     }
 
     #[test]

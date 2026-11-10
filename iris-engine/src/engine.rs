@@ -1,11 +1,59 @@
+use std::fs;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 use std::thread;
 use std::time::{Duration, Instant};
 use crate::color::kelvin_to_rgb;
 use crate::gamma::GammaRamp;
 use crate::overlay::ScreenDimmer;
 use crate::platform::{get_gamma_ramp, set_gamma_ramp, GammaSession};
+
+static SHUTDOWN_RESTORE: OnceLock<(GammaRamp, PathBuf)> = OnceLock::new();
+
+pub(crate) fn restore_on_shutdown() {
+    if let Some((ramp, path)) = SHUTDOWN_RESTORE.get() {
+        let _ = set_gamma_ramp(ramp);
+        let _ = fs::remove_file(path);
+    }
+}
+
+fn default_state_path() -> PathBuf {
+    std::env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .unwrap_or_else(std::env::temp_dir)
+        .join("Amber")
+        .join("gamma-baseline.bin")
+}
+
+fn resolve_baseline(path: &Path, current: GammaRamp) -> GammaRamp {
+    let baseline = read_ramp(path).unwrap_or(current);
+    if let Some(dir) = path.parent() {
+        let _ = fs::create_dir_all(dir);
+    }
+    let bytes: Vec<u8> = baseline.red.iter()
+        .chain(&baseline.green)
+        .chain(&baseline.blue)
+        .flat_map(|v| v.to_le_bytes())
+        .collect();
+    let _ = fs::write(path, bytes);
+    baseline
+}
+
+fn read_ramp(path: &Path) -> Option<GammaRamp> {
+    let bytes = fs::read(path).ok()?;
+    if bytes.len() != 1536 {
+        return None;
+    }
+    let mut words = bytes.chunks_exact(2).map(|c| u16::from_le_bytes([c[0], c[1]]));
+    let mut ramp = GammaRamp::linear();
+    for channel in [&mut ramp.red, &mut ramp.green, &mut ramp.blue] {
+        for v in channel.iter_mut() {
+            *v = words.next()?;
+        }
+    }
+    Some(ramp)
+}
 
 pub struct DisplayEngine {
     initial_ramp: GammaRamp,
@@ -16,14 +64,15 @@ pub struct DisplayEngine {
     transition_ms: u64,
     anim_token: Arc<AtomicU64>,
     dimmer: ScreenDimmer,
+    state_path: PathBuf,
 }
 
 impl DisplayEngine {
     pub fn new() -> Result<Self, String> {
-        let initial_ramp = get_gamma_ramp()
-            .ok()
-            .filter(|r| !r.is_tinted())
-            .unwrap_or_else(GammaRamp::linear);
+        let state_path = default_state_path();
+        let current = get_gamma_ramp().unwrap_or_else(|_| GammaRamp::linear());
+        let initial_ramp = resolve_baseline(&state_path, current);
+        let _ = SHUTDOWN_RESTORE.set((initial_ramp, state_path.clone()));
 
         Ok(Self {
             initial_ramp,
@@ -34,6 +83,7 @@ impl DisplayEngine {
             transition_ms: 350,
             anim_token: Arc::new(AtomicU64::new(0)),
             dimmer: ScreenDimmer::new(),
+            state_path,
         })
     }
 
@@ -82,14 +132,11 @@ impl DisplayEngine {
         if smooth && self.transition_ms > 0 {
             self.animate_to(target_ramp, self.transition_ms)
         } else {
+            let mut g = self.current_ramp.lock().unwrap_or_else(|e| e.into_inner());
             self.anim_token.fetch_add(1, Ordering::SeqCst);
-            if let Ok(mut g) = self.current_ramp.lock() {
-                if *g != target_ramp {
-                    let _ = set_gamma_ramp(&target_ramp);
-                    *g = target_ramp;
-                }
-            } else {
+            if *g != target_ramp {
                 let _ = set_gamma_ramp(&target_ramp);
+                *g = target_ramp;
             }
             Ok(())
         }
@@ -112,11 +159,10 @@ impl DisplayEngine {
         if smooth && self.transition_ms > 0 {
             self.animate_to(initial, self.transition_ms)
         } else {
+            let mut g = self.current_ramp.lock().unwrap_or_else(|e| e.into_inner());
             self.anim_token.fetch_add(1, Ordering::SeqCst);
             let _ = set_gamma_ramp(&initial);
-            if let Ok(mut g) = self.current_ramp.lock() {
-                *g = initial;
-            }
+            *g = initial;
             Ok(())
         }
     }
@@ -139,11 +185,12 @@ impl DisplayEngine {
     pub fn restore_initial(&mut self) -> Result<(), String> {
         self.is_active = false;
         self.dimmer.clear();
+        let mut g = self.current_ramp.lock().unwrap_or_else(|e| e.into_inner());
         self.anim_token.fetch_add(1, Ordering::SeqCst);
         let _ = set_gamma_ramp(&self.initial_ramp);
-        if let Ok(mut g) = self.current_ramp.lock() {
-            *g = self.initial_ramp;
-        }
+        *g = self.initial_ramp;
+        drop(g);
+        let _ = fs::remove_file(&self.state_path);
         Ok(())
     }
 
@@ -165,9 +212,6 @@ impl DisplayEngine {
             let mut last_applied = start_ramp;
 
             loop {
-                if token.load(Ordering::Relaxed) != generation {
-                    return;
-                }
                 let elapsed = start_time.elapsed();
                 if elapsed >= total_duration {
                     break;
@@ -175,25 +219,27 @@ impl DisplayEngine {
 
                 let factor = elapsed.as_secs_f64() / total_duration.as_secs_f64();
                 let intermediate = start_ramp.lerp(&target, factor);
-                if intermediate != last_applied {
-                    let _ = session.set_ramp(&intermediate);
-                    last_applied = intermediate;
-                }
-
-                if let Ok(mut g) = current_ramp_ref.lock() {
+                {
+                    let mut g = current_ramp_ref.lock().unwrap_or_else(|e| e.into_inner());
+                    if token.load(Ordering::SeqCst) != generation {
+                        return;
+                    }
+                    if intermediate != last_applied {
+                        let _ = session.set_ramp(&intermediate);
+                        last_applied = intermediate;
+                    }
                     *g = intermediate;
                 }
 
                 thread::sleep(frame_interval);
             }
 
-            if token.load(Ordering::Relaxed) == generation {
+            let mut g = current_ramp_ref.lock().unwrap_or_else(|e| e.into_inner());
+            if token.load(Ordering::SeqCst) == generation {
                 if target != last_applied {
                     let _ = session.set_ramp(&target);
                 }
-                if let Ok(mut g) = current_ramp_ref.lock() {
-                    *g = target;
-                }
+                *g = target;
             }
         });
 
@@ -203,8 +249,28 @@ impl DisplayEngine {
 
 impl Drop for DisplayEngine {
     fn drop(&mut self) {
-        self.anim_token.fetch_add(1, Ordering::SeqCst);
-        self.dimmer.clear();
-        let _ = set_gamma_ramp(&self.initial_ramp);
+        let _ = self.restore_initial();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_baseline_survives_unclean_exit() {
+        let path = std::env::temp_dir().join(format!("amber-baseline-test-{}.bin", std::process::id()));
+        let _ = fs::remove_file(&path);
+
+        let calibrated = GammaRamp::from_multipliers(1.0, 0.9, 0.8, None);
+        assert_eq!(resolve_baseline(&path, calibrated), calibrated);
+
+        let leftover = GammaRamp::from_multipliers(1.0, 0.95, 0.92, Some(&calibrated));
+        assert_eq!(resolve_baseline(&path, leftover), calibrated);
+
+        fs::remove_file(&path).unwrap();
+        assert_eq!(resolve_baseline(&path, leftover), leftover);
+
+        let _ = fs::remove_file(&path);
     }
 }
